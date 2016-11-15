@@ -12,13 +12,6 @@ if !exists('g:guesslang_threshold') | let g:guesslang_threshold = 20 | endif
 
 augroup GuessLang
   autocmd!
-  autocmd FileType * 
-        \ if &l:spell |
-        \   let b:guesslang_new = guesslang#guesslang() |
-        \   let b:guesslang_old = &l:spelllang |
-        \   let &l:spelllang    = b:guesslang_new |
-        \   silent doautocmd <nomodeline> User GuessLangUpdate |
-        \ endif
   if exists('##OptionSet')
     autocmd OptionSet spelllang
           \ let b:guesslang_explicit = 1 |
@@ -27,17 +20,22 @@ augroup GuessLang
           \ silent doautocmd <nomodeline> User GuessLangUpdate
   endif
   autocmd BufWinEnter *
-        \ if &l:spell |
-        \   call s:augroupUpdateLang() |
-        \ endif
+        \ if &l:spell && !exists('b:guesslang_explicit') |
+        \   let b:guesslang_new = guesslang#guesslang() |
+        \   let b:guesslang_old = &l:spelllang |
+        \   let &l:spelllang    = b:guesslang_new |
+        \   silent doautocmd <nomodeline> User GuessLangUpdate |
+        \ endif |
+        \ call s:augroupUpdateLang()
 augroup end
 
 function! s:augroupUpdateLang()
   augroup guesslangUpdateLang
     autocmd!
     autocmd CursorHold,CursorHoldI,InsertLeave <buffer> 
-          \   if !exists('b:guesslang_explicit') && (b:changedtick >= 80  && wordcount().words >= 10) |
-          \     exe 'silent doautocmd <nomodeline> GuessLang FileType' |
+          \   if    (&l:spell && !exists('b:guesslang_explicit')) 
+          \      && (b:changedtick >= 80  && wordcount().words >= 10) |
+          \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
           \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,InsertLeave <buffer>' |
           \   endif
   augroup END
