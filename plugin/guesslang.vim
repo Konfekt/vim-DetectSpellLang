@@ -1,10 +1,23 @@
 if !executable('aspell')
-  echoerr 'GuessLang: Please install ASPELL'
+  echoerr 'GuessLang: Please install ASPELL!'
+  finish
 endif
 
 if !exists('g:guesslang_langs')
-  echoerr 'GuessLang: Please set at least two languages in g:guesslang_langs in your ~/.vimrc. Defaulting to system language.'
-  let g:guesslang_langs = [ v:lang ]
+
+  if tolower(matchstr(v:lang, '^\a\a')) is# 'en'
+    echoerr 'GuessLang: Please list at least two different languages in g:guesslang_langs!'
+    finish
+  endif
+
+  let v_lang = matchstr(v:lang, '^\a\a_\a\a')
+  let dicts = systemlist('aspell dicts')
+  let g:guesslang_langs = filter(dicts, 'v:val is# "'. 'en' . '"' . '||' . 'v:val is# "' . v_lang . '"')
+  if len(g:guesslang_langs) < 2
+    echoerr 'GuessLang: Please list at least two different languages in g:guesslang_langs!'
+    finish
+  endif
+
 endif
 
 if !exists('g:guesslang_lines')     | let g:guesslang_lines = 20     | endif
@@ -32,8 +45,8 @@ augroup end
 function! s:augroupUpdateLang()
   augroup guesslangUpdateLang
     autocmd!
-    autocmd CursorHold,CursorHoldI,InsertLeave <buffer> 
-          \   if    (&l:spell && !exists('b:guesslang_explicit')) 
+    autocmd CursorHold,CursorHoldI,InsertLeave <buffer>
+          \   if    (&l:spell && !exists('b:guesslang_explicit'))
           \      && (b:changedtick >= 80  && wordcount().words >= 10) |
           \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
           \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,InsertLeave <buffer>' |
