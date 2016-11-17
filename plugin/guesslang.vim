@@ -1,10 +1,10 @@
 if !executable('aspell')
-  echoerr 'GuessLang: please install ASPELL'
+  echoerr 'GuessLang: Please install ASPELL'
 endif
 
 if !exists('g:guesslang_langs')
-  echoerr 'GuessLang: please add "let g:guesslang_langs = [ ''en'', ... ]" to .vimrc'
-  let g:guesslang_langs = []
+  echoerr 'GuessLang: Please set at least two languages in g:guesslang_langs in your ~/.vimrc. Defaulting to system language.'
+  let g:guesslang_langs = [ v:lang ]
 endif
 
 if !exists('g:guesslang_lines')     | let g:guesslang_lines = 20     | endif
