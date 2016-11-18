@@ -45,11 +45,11 @@ augroup end
 function! s:augroupUpdateLang()
   augroup guesslangUpdateLang
     autocmd!
-    autocmd CursorHold,CursorHoldI,InsertLeave <buffer>
+    autocmd CursorHold,CursorHoldI,BufWrite <buffer>
           \   if    (&l:spell && !exists('b:guesslang_explicit'))
           \      && (b:changedtick >= 80  && wordcount().words >= 10) |
           \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
-          \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,InsertLeave <buffer>' |
+          \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
           \   endif
   augroup END
 endfunction
