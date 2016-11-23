@@ -19,7 +19,6 @@ or the line
   setlocal spell
 ```
 to `text.vim`, `markdown.vim` and `mail.vim` in `~/.vim/ftplugin` (on Microsoft Windows, in `%USERPROFILE%\vimfiles\ftplugin`).
-[^1]
 
 The spell-check language is detected in-between those listed in the variable `g:guesslang_langs`.
 It is *empty* by default and must be set by the user, choosing the appropriate spell-check languages among the output of the command `aspell dicts`!
@@ -28,5 +27,3 @@ For example,
     let g:guesslang_langs = [ 'en_US', 'de_DE', 'es', 'it' ]
 ```
 
-
-[^1]:  
