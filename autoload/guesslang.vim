@@ -14,7 +14,7 @@ function! guesslang#guesslang() abort
   else
     let words = len(split(content))
 
-    if     &l:filetype is# 'mail'         | let mode = ' --mode=email'
+    if     &l:filetype is# 'mail'         | let mode = ''
     elseif &l:filetype is# 'tex'          | let mode = ' --mode=tex --dont-tex-check-comments'
     elseif &l:filetype is# 'html'         | let mode = ' --mode=html'
     elseif &l:filetype is# 'nroff'        | let mode = ' --mode=nroff'
