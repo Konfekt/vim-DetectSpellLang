@@ -1,0 +1,72 @@
+          GuessLang, autodetect spellcheck-language   *GuessLang* *guesslang*
+
+===========================================================================
+
+0. Introduction ~
+                                          *GuessLang-intro* *guesslang-intro*
+
+This plug-in makes Vim autodetect the language of the text in a newly or
+recently (after typing a couple of words) opened buffer (which is spell
+checked, that is, `&spell` is set).
+
+It depends on the spell checker `aspell` (which is contained in many Linux
+distributions by default, and also available for Microsoft Windows where
+the path to its executable must be added to the `%PATH%` environment
+variable).
+
+To ensure that certain file types, for example 'text', 'markdown' and 'mail',
+are spell checked, add either the line
+>
+  autocmd FileType text,markdown,mail setlocal spell
+<
+or the line
+>
+  setlocal spell
+<
+to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
+
+===========================================================================
+2. Config ~
+                                        *GuessLang-config* *guesslang-config*
+
+- The language is detected in-between those listed in the variable
+  `g:guesslang_langs`. It is *empty* by default and has to be set by the user
+  among those listed in `aspell dicts`! For example,
+
+>
+  let g:guesslang_langs = [ 'en_US', 'de_DE', 'es', 'it' ]
+<
+
+- The value of 'g:guesslang_lines' defines how many lines are tested for
+  spelling mistakes by *aspell* to derive the suitable spellcheck-language. By
+  default
+
+>
+  let g:guesslang_lines = 20
+<
+
+- The value of 'g:guesslang_threshold' defines the percentage of spelling
+  mistakes among all words below which a spellcheck-language is recognized as
+  correct. For example, with the default
+
+>
+  let g:guesslang_threshold' = 20
+<
+
+  and g:guesslang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words
+  in the buffer are spelling mistakes for 'en_US', then 'GuessLang' does not
+  verify if the percentage of spelling mistakes for 'de_DE' is below that for
+  'en_US'.
+
+- The autocommand event
+
+>
+  User GuessLangUpdate
+<
+
+  provides by the buffer-local variables `b:guesslang_old` and
+  `b:guesslang_new` the previous and current value of `&l:spelllang`, the
+  spell-check language. This way, a user command, for example for adding and
+  removing abbreviations specific to a language, can hook in.
+
+vim:tw=78:ts=2:sts=2:sw=2:ft=help:norl
