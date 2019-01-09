@@ -39,7 +39,7 @@ function! guesslang#guesslang() abort
     endfor
   endif
 
-  let lang_pattern = '^\a\a'
+  let lang_pattern = '^\a\a\(_\a\a\)\?'
   let lang = tolower(matchstr(lang, lang_pattern))
   return lang
 endfunction

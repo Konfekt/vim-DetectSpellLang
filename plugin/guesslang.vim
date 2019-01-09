@@ -36,7 +36,7 @@ augroup GuessLang
         \ if &l:spell && !exists('b:guesslang_explicit') |
         \   let b:guesslang_new = guesslang#guesslang() |
         \   let b:guesslang_old = &l:spelllang |
-        \   let &l:spelllang    = b:guesslang_new |
+        \   silent let &l:spelllang    = b:guesslang_new |
         \   silent doautocmd <nomodeline> User GuessLangUpdate |
         \ endif |
         \ call s:augroupUpdateLang()
