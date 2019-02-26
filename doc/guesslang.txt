@@ -45,6 +45,23 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
   let g:guesslang_lines = 20
 <
 
+- The values in the dictionary 'g:guesslang_ftoptions' define filetype-
+  dependent options for *aspell* (to specify the filter mode, for example).
+  By default
+
+>
+  let g:guesslang_ftoptions = {
+    \ 'tex'   : [ '--mode=tex', '--dont-tex-check-comments' ],
+    \ 'html'  : '--mode=html',
+    \ 'nroff' : '--mode=nroff',
+    \ 'perl'  : '--mode=perl',
+    \ 'c'     : '--mode=ccpp',
+    \ 'cpp'   : '--mode=ccpp',
+    \ 'sgml'  : '--mode=sgml',
+    \ 'xml'   : '--mode=sgml',
+    \}
+<
+
 - The value of 'g:guesslang_threshold' defines the percentage of spelling
   mistakes among all words below which a spellcheck-language is recognized as
   correct. For example, with the default
@@ -70,3 +87,4 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
   removing abbreviations specific to a language, can hook in.
 
 vim:tw=78:ts=2:sts=2:sw=2:ft=help:norl
+
