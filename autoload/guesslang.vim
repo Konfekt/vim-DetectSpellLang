@@ -14,20 +14,20 @@ function! guesslang#guesslang() abort
   else
     let words = len(split(content))
 
-    if     &l:filetype is# 'mail'         | let mode = ''
-    elseif &l:filetype is# 'tex'          | let mode = ' --mode=tex --dont-tex-check-comments'
-    elseif &l:filetype is# 'html'         | let mode = ' --mode=html'
-    elseif &l:filetype is# 'nroff'        | let mode = ' --mode=nroff'
-    elseif &l:filetype is# 'perl'         | let mode = ' --mode=perl'
-    elseif &l:filetype =~# '\v^c(pp)?$'   | let mode = ' --mode=ccpp'
-    elseif &l:filetype =~# '\v^(sg|x)ml$' | let mode = ' --mode=sgml'
-    else                                  | let mode = ''
+    let opts = []
+    if exists('g:guesslang_ftoptions')
+      for filetype in keys(g:guesslang_ftoptions)
+        if &l:filetype is# filetype
+          let opts = get(g:guesslang_ftoptions, filetype, '')
+          break
+        endif
+      endfor
     endif
 
     " For each language, get number of misspelled words according to aspell.
     " The language with the least misspelled words is the spell language
     for guess in g:guesslang_langs
-      let mist = len(split(system('aspell --lang=' . guess . mode . ' list ', content)))
+      let mist = len(split(system('aspell --lang=' . guess . ' ' . join(opts) . ' list ', content)))
       " already correct lang if less threshold many % wrong
       if (mist * 100 / words) < g:guesslang_threshold
         let lang = guess
