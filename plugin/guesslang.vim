@@ -24,14 +24,14 @@ if !exists('g:guesslang_lines')     | let g:guesslang_lines = 20     | endif
 if !exists('g:guesslang_threshold') | let g:guesslang_threshold = 20 | endif
 if !exists('g:guesslang_ftoptions')
   let g:guesslang_ftoptions = {
-    \ 'tex'   : [ '--mode=tex', '--dont-tex-check-comments' ],
-    \ 'html'  : '--mode=html',
-    \ 'nroff' : '--mode=nroff',
-    \ 'perl'  : '--mode=perl',
-    \ 'c'     : '--mode=ccpp',
-    \ 'cpp'   : '--mode=ccpp',
-    \ 'sgml'  : '--mode=sgml',
-    \ 'xml'   : '--mode=sgml',
+    \ 'tex'   : ['--mode=tex', '--dont-tex-check-comments'],
+    \ 'html'  : ['--mode=html'],
+    \ 'nroff' : ['--mode=nroff'],
+    \ 'perl'  : ['--mode=perl'],
+    \ 'c'     : ['--mode=ccpp'],
+    \ 'cpp'   : ['--mode=ccpp'],
+    \ 'sgml'  : ['--mode=sgml'],
+    \ 'xml'   : ['--mode=sgml'],
     \}
 endif
 
