@@ -35,6 +35,18 @@ if !exists('g:guesslang_ftoptions')
     \}
 endif
 
+function! s:augroupUpdateLang()
+  augroup guesslangUpdateLang
+    autocmd!
+    autocmd CursorHold,CursorHoldI,BufWrite <buffer>
+          \   if    (&l:spell && !exists('b:guesslang_explicit'))
+          \      && (b:changedtick >= 80  && wordcount().words >= 10) |
+          \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
+          \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
+          \   endif
+  augroup END
+endfunction
+
 augroup GuessLang
   autocmd!
   if exists('##OptionSet')
@@ -53,15 +65,6 @@ augroup GuessLang
         \ endif |
         \ call s:augroupUpdateLang()
 augroup end
-
-function! s:augroupUpdateLang()
-  augroup guesslangUpdateLang
-    autocmd!
-    autocmd CursorHold,CursorHoldI,BufWrite <buffer>
-          \   if    (&l:spell && !exists('b:guesslang_explicit'))
-          \      && (b:changedtick >= 80  && wordcount().words >= 10) |
-          \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
-          \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
-          \   endif
-  augroup END
-endfunction
+if argc() > 1
+  silent doautocmd GuessLang BufWinEnter
+endif
