@@ -1,9 +1,11 @@
-          GuessLang, autodetect spellcheck-language   *GuessLang* *guesslang*
+              DetectSpellLang: autodetect the spellcheck-language
+
+                                        *DetectSpellLang* *detectspelllang*
 
 ===========================================================================
 
 0. Introduction ~
-                                          *GuessLang-intro* *guesslang-intro*
+                            *DetectSpellLang-intro* *detectspelllang-intro*
 
 This plug-in makes Vim autodetect the language of the text in a newly or
 recently (after typing a couple of words) opened buffer (which is spell
@@ -27,7 +29,7 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 
 ===========================================================================
 2. Config ~
-                                        *GuessLang-config* *guesslang-config*
+                          *DetectSpellLang-config* *detectspelllang-config*
 
 - The language is detected in-between those listed in the variable
   `g:guesslang_langs`. It is *empty* by default and has to be set by the user
@@ -38,15 +40,15 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 <
 
 - The value of 'g:guesslang_lines' defines how many lines are tested for
-  spelling mistakes by *aspell* to derive the suitable spellcheck-language. By
-  default
+  spelling mistakes by `aspell` to derive the suitable spellcheck-language.
+  By default
 
 >
   let g:guesslang_lines = 20
 <
 
 - The values in the dictionary 'g:guesslang_ftoptions' define filetype-
-  dependent options for *aspell* (to specify the filter mode, for example).
+  dependent options for `aspell` (to specify the filter mode, for example).
   By default
 
 >
@@ -71,9 +73,9 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 <
 
   and g:guesslang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words
-  in the buffer are spelling mistakes for 'en_US', then 'GuessLang' does not
-  verify if the percentage of spelling mistakes for 'de_DE' is below that for
-  'en_US'.
+  in the buffer are spelling mistakes for 'en_US', then 'DetectSpellLang' does
+  not verify if the percentage of spelling mistakes for 'de_DE' is below that
+  for 'en_US'.
 
 - The autocommand event
 
