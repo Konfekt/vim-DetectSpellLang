@@ -27,3 +27,6 @@ For example,
     let g:guesslang_langs = [ 'en_US', 'de_DE', 'es', 'it' ]
 ```
 
+# Credits
+
+This plug-in fleshed out a [gist](https://gist.github.com/arenevier/1142114) by Arno Renevier that, later on, in May 2019, turns out to be part of a plug-in [GuessLang.vim](https://github.com/arenevier/vimguesslang/blob/master/GuessLang.vim) from 2011 by the same author.
