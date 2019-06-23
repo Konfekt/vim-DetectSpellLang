@@ -27,7 +27,7 @@ function! guesslang#guesslang() abort
     " For each language, get number of misspelled words according to aspell.
     " The language with the least misspelled words is the spell language
     for guess in g:guesslang_langs
-      let mist = len(split(system('aspell --lang=' . guess . ' ' . join(opts) . ' list ', content)))
+      silent let mist = len(split(system('aspell --lang=' . guess . ' ' . join(opts) . ' list ', content)))
       " already correct lang if less threshold many % wrong
       if (mist * 100 / words) < g:guesslang_threshold
         let lang = guess
