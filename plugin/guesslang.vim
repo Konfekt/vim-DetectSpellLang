@@ -1,3 +1,12 @@
+if exists('g:loaded_DetectSpellLang') || &cp
+  finish
+endif
+let g:loaded_DetectSpellLang = 1
+
+let s:keepcpo         = &cpo
+set cpo&vim
+" ------------------------------------------------------------------------------
+
 if !executable('aspell')
   echoerr 'GuessLang: Please install ASPELL!'
   finish
@@ -68,3 +77,7 @@ augroup end
 if argc() > 1
   silent doautocmd GuessLang BufWinEnter
 endif
+
+" ------------------------------------------------------------------------------
+let &cpo= s:keepcpo
+unlet s:keepcpo
