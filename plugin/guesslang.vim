@@ -8,14 +8,14 @@ set cpo&vim
 " ------------------------------------------------------------------------------
 
 if !executable('aspell')
-  echoerr 'GuessLang: Please install ASPELL!'
+  echoerr 'DetectSpellLang: Please install ASPELL!'
   finish
 endif
 
 if !exists('g:guesslang_langs')
 
   if tolower(matchstr(v:lang, '^\a\a')) is# 'en'
-    echoerr 'GuessLang: Please list at least two different languages in g:guesslang_langs!'
+    echoerr 'DetectSpellLang: Please list at least two different languages in g:guesslang_langs!'
     finish
   endif
 
@@ -23,7 +23,7 @@ if !exists('g:guesslang_langs')
   let dicts = systemlist('aspell dicts')
   let g:guesslang_langs = filter(dicts, 'v:val is# "'. 'en' . '"' . '||' . 'v:val is# "' . v_lang . '"')
   if len(g:guesslang_langs) < 2
-    echoerr 'GuessLang: Please list at least two different languages in g:guesslang_langs!'
+    echoerr 'DetectSpellLang: Please list at least two different languages in g:guesslang_langs!'
     finish
   endif
 
@@ -45,18 +45,18 @@ if !exists('g:guesslang_ftoptions')
 endif
 
 function! s:augroupUpdateLang()
-  augroup guesslangUpdateLang
+  augroup DetectSpellLangUpdateLang
     autocmd!
     autocmd CursorHold,CursorHoldI,BufWrite <buffer>
           \   if    (&l:spell && !exists('b:guesslang_explicit'))
           \      && (b:changedtick >= 80  && wordcount().words >= 10) |
-          \     exe 'silent doautocmd <nomodeline> GuessLang BufWinEnter' |
-          \     exe 'autocmd! guesslangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
+          \     exe 'silent doautocmd <nomodeline> DetectSpellLang BufWinEnter' |
+          \     exe 'autocmd! DetectSpellLangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
           \   endif
   augroup END
 endfunction
 
-augroup GuessLang
+augroup DetectSpellLang
   autocmd!
   if exists('##OptionSet')
     autocmd OptionSet spelllang
@@ -75,7 +75,7 @@ augroup GuessLang
         \ call s:augroupUpdateLang()
 augroup end
 if argc() > 1
-  silent doautocmd GuessLang BufWinEnter
+  silent doautocmd DetectSpellLang BufWinEnter
 endif
 
 " ------------------------------------------------------------------------------
