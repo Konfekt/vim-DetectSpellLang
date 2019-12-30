@@ -29,7 +29,7 @@ if !exists('g:guesslang_langs')
 
 endif
 
-if !exists('g:guesslang_lines')     | let g:guesslang_lines = 20     | endif
+if !exists('g:guesslang_lines')     | let g:guesslang_lines = 100   | endif
 if !exists('g:guesslang_threshold') | let g:guesslang_threshold = 20 | endif
 if !exists('g:guesslang_ftoptions')
   let g:guesslang_ftoptions = {

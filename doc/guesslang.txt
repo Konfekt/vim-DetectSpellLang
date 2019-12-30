@@ -43,7 +43,7 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
   By default
 
 >
-  let g:guesslang_lines = 20
+  let g:guesslang_lines = 100
 <
 
 - The values in the dictionary 'g:guesslang_ftoptions' define filetype-

@@ -38,7 +38,7 @@ For example,
     By default
 
     ```vim
-    let g:guesslang_lines = 20
+    let g:guesslang_lines = 100
     ```
 
 - The values in the dictionary 'g:guesslang_ftoptions' define filetype- dependent options for `aspell` (to specify the filter mode, for example).
