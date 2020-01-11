@@ -4,13 +4,34 @@
 # Introduction
 
 This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has not been explicitly set, say by a modeline `:help modeline`).
-It uses the spell checker `aspell` (which is contained in many Linux distributions by default, in Mac OS, and also [available](http://aspell.net/man-html/WIN32-Notes.html) for Microsoft Windows, where the path to its executable must be added to the `%PATH%` environment variable).
+It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows, where the path to its executable must be added to the `%PATH%` environment variable).
 
-# Setup
+# CHANGES
 
-This plug-in only acts on buffers that are spell checked, that is, `&l:spell` is set.
-To ensure that certain file types, such as `text`, `markdown` and `mail`,
-are spell checked, add either the line
+Version `2.0` introduces breaking changes.
+Please adapt your configuration accordingly:
+
+- Substitute the prefix `g:guesslang_` by `g:detectspelllang_`,
+- Substitute the autocommand event label `GuessLangUpdate` by `DetectSpellLangUpdate`, and
+- Substitute, say
+
+    ```vim
+      let g:guesslang_langs = [ ... ]
+    ```
+
+    by
+
+    ```vim
+      let g:detectspelllang_langs = {}
+      let g:detectspelllang_langs.aspell = [ ... ]
+    ```
+
+    where `...` is your list of `g:guesslang_langs`.
+
+# Initial Setup
+
+This plug-in only operates in buffers that are spell checked, that is, `&l:spell` is set.
+To ensure that certain file types, such as `text`, `markdown` and `mail`, are spell checked, add either the line
 
 ```vim
   autocmd FileType text,markdown,mail setlocal spell
@@ -24,55 +45,76 @@ or the line
 
 to `text.vim`, `markdown.vim` and `mail.vim` in `~/.vim/ftplugin` (on Microsoft Windows, in `%USERPROFILE%\vimfiles\ftplugin`).
 
-The spell-check language is detected in-between those listed in the variable `g:guesslang_langs`.
-It is *empty* by default and must be set by the user, choosing the appropriate spell-check languages among those listed in the output of the command `aspell dicts`!
+The executable of the spell checker is automatically detected and preference given to `aspell`.
+You can override this automatic detection by adding to you `vimrc` say
+
+```vim
+    let g:detectspelllang_program = 'hunspell'
+```
+
+The spell-check language is detected among those listed in the variable `g:detectspelllang_langs.aspell` respectively `g:detectspelllang_langs.hunspell`.
+It is *empty* by default and must be set by the user, choosing the appropriate spell-check languages among those listed in the output of the command `aspell dicts` respectively `hunspell -D`**!**
 For example,
 
 ```vim
-    let g:guesslang_langs = [ 'en_US', 'de_DE', 'es', 'it' ]
+    let g:detectspelllang_langs = {
+      \ 'aspell'   : [ 'en_US', 'de_DE', 'es', 'it' ],
+      \ 'hunspell' : [ 'en_US', 'de_DE', 'es_ES', 'it_IT' ],
+      \ }
 ```
+
+Please pay attention, as `hunspell` does, to the upper case of the suffix of the language code.
 
 # Configuration
 
-- The value of `g:guesslang_lines` defines how many lines are tested for spelling mistakes by `aspell` to derive the suitable spellcheck-language.
+- The value of `g:detectspelllang_lines` defines how many lines are tested for spelling mistakes by `aspell` or `hunspell` to derive the suitable spellcheck-language.
     By default
 
     ```vim
-    let g:guesslang_lines = 100
+    let g:detectspelllang_lines = 1000
     ```
 
-- The values in the dictionary 'g:guesslang_ftoptions' define filetype- dependent options for `aspell` (to specify the filter mode, for example).
+- The values in the dictionary 'g:detectspelllang_ftoptions' define filetype dependent options for `aspell` or `hunspell` (to specify the filter mode, for example).
     By default
 
     ```vim
-    let g:guesslang_ftoptions = {
-        \ 'tex'   : [ '--mode=tex', '--dont-tex-check-comments' ],
-        \ 'html'  : '--mode=html',
-        \ 'nroff' : '--mode=nroff',
-        \ 'perl'  : '--mode=perl',
-        \ 'c'     : '--mode=ccpp',
-        \ 'cpp'   : '--mode=ccpp',
-        \ 'sgml'  : '--mode=sgml',
-        \ 'xml'   : '--mode=sgml',
+    let g:detectspelllang_ftoptions = {
+    \ 'aspell' : {
+        \ 'tex'   : ['--mode=tex', '--dont-tex-check-comments'],
+        \ 'html'  : ['--mode=html'],
+        \ 'nroff' : ['--mode=nroff'],
+        \ 'perl'  : ['--mode=perl'],
+        \ 'c'     : ['--mode=ccpp'],
+        \ 'cpp'   : ['--mode=ccpp'],
+        \ 'sgml'  : ['--mode=sgml'],
+        \ 'xml'   : ['--mode=sgml'],
+        \},
+    \ 'hunspell' : {
+        \ 'tex'   : ['-t'],
+        \ 'html'  : ['-H'],
+        \ 'nroff' : ['-n'],
+        \ 'odt'   : ['-O'],
+        \ 'xml'   : ['-X'],
         \}
+    \ }
     ```
 
-- The value of `g:guesslang_threshold` defines the percentage of spelling mistakes among all words below which a spellcheck-language is recognized as correct.
+- The value of `g:detectspelllang_threshold` defines the percentage of spelling mistakes among all words below which a spellcheck-language is recognized as correct.
     For example, with the default
 
     ```vim
-    let g:guesslang_threshold' = 20
+    let g:detectspelllang_threshold = 20
     ```
 
-  and g:guesslang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
+  and g:detectspelllang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
 
 - The autocommand event
 
     ```vim
-    User GuessLangUpdate
+    User DetectSpellLangUpdate
     ```
 
-  provides by the buffer-local variables `b:guesslang_old` and `b:guesslang_new` the previous and current value of `&l:spelllang`, the spell-check language.
+  provides by the buffer-local variables `b:detectspelllang_old` and `b:detectspelllang_new` the previous and current value of `&l:spelllang`, the spell-check language.
     This way, a user command, for example for adding and removing abbreviations specific to a language, can hook in.
 
 # Credits
