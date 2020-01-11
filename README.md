@@ -52,8 +52,11 @@ You can override this automatic detection by adding to you `vimrc` say
     let g:detectspelllang_program = 'hunspell'
 ```
 
-The spell-check language is detected among those listed in the variable `g:detectspelllang_langs.aspell` respectively `g:detectspelllang_langs.hunspell`.
-It is *empty* by default and must be set by the user, choosing the appropriate spell-check languages among those listed in the output of the command `aspell dicts` respectively `hunspell -D`**!**
+The language is detected, depending on whether `aspell` respectively `hunspell`
+is used, among those listed in `g:detectspelllang_langs.aspell` respectively
+`g:detectspelllang_langs.hunspell`. It is *empty* by default and has to be
+set by the user to a list of languages included in that of the output of the
+command `aspell dicts` respectively `hunspell -D`**!**
 For example,
 
 ```vim

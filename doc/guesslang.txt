@@ -31,11 +31,12 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 2. Config ~
                           *DetectSpellLang-config* *detectspelllang-config*
 
-- The language is detected depending on whether aspell or hunspell is used,
-  among those listed in g:detectspelllang_langs.aspell respectively
+- The language is detected, depending on whether aspell respectively hunspell
+  is used, among those listed in g:detectspelllang_langs.aspell respectively
   g:detectspelllang_langs.hunspell. It is *empty* by default and has to be
-  set by the user among those listed in the output of the command aspell
-  dicts respectively hunspell -D! For example, in case you use aspell,
+  set by the user to a list of languages included in that of the output of the
+  command aspell dicts respectively hunspell -D!
+
 >
   let g:detectspelllang_langs = {}
   let g:detectspelllang_langs.aspell = [ 'en_US', 'de_DE', 'es', 'it' ]
