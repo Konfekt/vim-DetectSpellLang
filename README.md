@@ -3,8 +3,8 @@
 
 # Introduction
 
-This plug-in makes Vim autodetect the tongue (= `&spelllang`) of the text contained in a buffer (which is spell checked, that is, `&spell` is set).
-It depends on the spell checker `aspell` (which is contained in many Linux distributions by default, in Mac OS, and also available for Microsoft Windows, where the path to its executable must be added to the `%PATH%` environment variable).
+This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has not been explicitly set, say by a modeline `:help modeline`).
+It uses the spell checker `aspell` (which is contained in many Linux distributions by default, in Mac OS, and also [available](http://aspell.net/man-html/WIN32-Notes.html) for Microsoft Windows, where the path to its executable must be added to the `%PATH%` environment variable).
 
 # Setup
 
