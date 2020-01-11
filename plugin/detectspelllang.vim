@@ -91,6 +91,13 @@ augroup DetectSpellLang
           \ let b:detectspelllang_new = v:option_new |
           \ let b:detectspelllang_old = v:option_old |
           \ silent doautocmd <nomodeline> User DetectSpellLangUpdate
+    autocmd OptionSet spell
+          \ if v:option_new && !exists('b:detectspelllang_explicit') |
+          \   let b:detectspelllang_new = detectspelllang#detectspelllang() |
+          \   let b:detectspelllang_old = &l:spelllang |
+          \   silent let &l:spelllang    = b:detectspelllang_new |
+          \   silent doautocmd <nomodeline> User DetectSpellLangUpdate |
+          \ endif
   endif
   autocmd BufWinEnter *
         \ if &l:spell && !exists('b:detectspelllang_explicit') |
