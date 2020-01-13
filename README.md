@@ -4,7 +4,6 @@
 # Introduction
 
 This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has not been explicitly set, say by a modeline `:help modeline`).
-It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows, where the path to its executable must be added to the `%PATH%` environment variable).
 
 # CHANGES
 
@@ -28,19 +27,34 @@ Please adapt your configuration accordingly:
 
     where `...` is your list of `g:guesslang_langs`.
 
-# Initial Setup
+# Installation
+
+It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows.
+
+In Microsoft Windows the path to the executable must
+
+- be either added to the `%PATH%` environment variable (say by [Rapidee](http://www.rapidee.com/)), or
+- set by `g:detectspelllang_program`, say
+
+```vim
+    let g:detectspelllang_program = 'C:\Program Files (x86)\Aspell\bin\aspell.exe'
+```
+
+The Chocolatey package [hunspell](https://chocolatey.org/packages/hunspell.portable) automatically adds `hunspell` to the `%PATH`.
+
+# Set-up
 
 This plug-in only operates in buffers that are spell checked, that is, `&l:spell` is set.
 To ensure that certain file types, such as `text`, `markdown` and `mail`, are spell checked, add either the line
 
 ```vim
-  autocmd FileType text,markdown,mail setlocal spell
+    autocmd FileType text,markdown,mail setlocal spell
 ```
 
 or the line
 
 ```vim
-  setlocal spell
+    setlocal spell
 ```
 
 to `text.vim`, `markdown.vim` and `mail.vim` in `~/.vim/ftplugin` (on Microsoft Windows, in `%USERPROFILE%\vimfiles\ftplugin`).
@@ -102,6 +116,9 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
     \ }
     ```
 
+    Note that on Windows the most recent official aspell binaries are from
+    2002 and do not support all above file type options, for example, for 'tex'.
+
 - The value of `g:detectspelllang_threshold` defines the percentage of spelling mistakes among all words below which a spellcheck-language is recognized as correct.
     For example, with the default
 
@@ -109,7 +126,7 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
     let g:detectspelllang_threshold = 20
     ```
 
-  and g:detectspelllang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
+    and g:detectspelllang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
 
 - The autocommand event
 
@@ -117,7 +134,7 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
     User DetectSpellLangUpdate
     ```
 
-  provides by the buffer-local variables `b:detectspelllang_old` and `b:detectspelllang_new` the previous and current value of `&l:spelllang`, the spell-check language.
+    provides by the buffer-local variables `b:detectspelllang_old` and `b:detectspelllang_new` the previous and current value of `&l:spelllang`, the spell-check language.
     This way, a user command, for example for adding and removing abbreviations specific to a language, can hook in.
 
 # Credits

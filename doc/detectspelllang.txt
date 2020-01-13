@@ -6,17 +6,32 @@
 0. Introduction ~
                             *DetectSpellLang-intro* *detectspelllang-intro*
 
-This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a
-buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has
+This Vim plug-in autodetects the tongue (= |&spelllang|) of the text in a
+buffer (if it is spell checked, that is, |&spell| is set, and |&spelllang| has
 not been explicitly set, say by a modeline :help modeline).
+
 
 It uses either the spell checker aspell or hunspell (which are installed
 in many Linux distributions, in Mac OS, and both available for Microsoft
-Windows, where the path to its executable must be added to the `%PATH%`
+Windows, where the path to its executable must be added to the %PATH%
 environment variable).
 
+===========================================================================
+
+1. Installation ~
+                *DetectSpellLang-installation* *detectspelllang-installation*
+
+In Microsoft Windows the path to the executable must
+
+- be either added to the %PATH% environment variable (say by Rapidee), or
+- set by g:detectspelllang_program, say >
+
+  let g:detectspelllang_program = 'C:\Program Files (x86)\Aspell\bin\aspell.exe'
+
+The Chocolatey package hunspell automatically adds hunspell to %PATH.
+
 This plug-in only operates in buffers that are spell checked, that is,
-`&l:spell` is set. To ensure that certain file types, for example 'text',
+|&l:spell| is set. To ensure that certain file types, for example 'text',
 'markdown' and 'mail', are spell checked, add either the line
 >
   autocmd FileType text,markdown,mail setlocal spell
@@ -76,6 +91,8 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
     \ 'xml'   : ['-X'],
     \}
 <
+  Note that on Windows the most recent official aspell binaries are from
+  2002 and do not support all above file type options, for example, for 'tex'.
 
 - The value of 'g:detectspelllang_threshold' defines the percentage of spelling
   mistakes among all words below which a spellcheck-language is recognized as
