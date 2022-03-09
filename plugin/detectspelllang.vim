@@ -36,9 +36,9 @@ if !exists('g:detectspelllang_langs')
   let v_lang = matchstr(v:lang, '^\a\a_\a\a')
   let dicts = systemlist(g:detectspelllang_aspell ? 'aspell dicts' : 'hunspell -D')
   let s:langs = filter(dicts, 'v:val is# "'. 'en' . '"' . '||' . 'v:val is# "' . v_lang . '"')
-  exe 'let g:detectspelllang_langs.g:detectspelllang_program = ' . 's:langs'
+  let g:detectspelllang_langs[g:detectspelllang_program] = s:langs
   unlet s:langs
-  if len(g:detectspelllang_langs.g:detectspelllang_program) < 2
+  if len(g:detectspelllang_langs[g:detectspelllang_program]) < 2
     echoerr 'DetectSpellLang: Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '!'
     finish
   endif

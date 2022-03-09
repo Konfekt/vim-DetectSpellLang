@@ -7,7 +7,7 @@ function! detectspelllang#detectspelllang() abort
 
   let opts = []
   if exists('g:detectspelllang_ftoptions.' . g:detectspelllang_program)
-    exe 'let ftoptions = g:detectspelllang_ftoptions.' . g:detectspelllang_program
+    let ftoptions = g:detectspelllang_ftoptions[g:detectspelllang_program]
     for filetype in keys(ftoptions)
       if &l:filetype is# filetype
         let opts = get(ftoptions, filetype, '')
@@ -21,7 +21,7 @@ function! detectspelllang#detectspelllang() abort
     let lines = filter(lines, 'v:val =~# "\\v(^|[[:space:]])[[:lower:][:upper:]]{2,}[[:space:]][[:lower:][:upper:]]"')
   endif
 
-  exe 'let langs = g:detectspelllang_langs.' . g:detectspelllang_program
+  let langs = g:detectspelllang_langs[g:detectspelllang_program]
   if empty(lines) || len(langs) < 2
     " default to first (=system) language
     let lang = langs[0]
