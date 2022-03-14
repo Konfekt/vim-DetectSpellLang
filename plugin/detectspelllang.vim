@@ -35,7 +35,7 @@ if !exists('g:detectspelllang_langs')
 
   let v_lang = matchstr(v:lang, '^\a\a_\a\a')
   if !executable('sed')
-      let s:hunspell_dicts_cmd = 'hunspell -D |& sed "1,/AVAILABLE DICTIONARIES/d"'
+      let s:hunspell_dicts_cmd = 'hunspell -D 2>&1 | sed "1,/AVAILABLE DICTIONARIES/d"'
   else
       " Not able to filter out the search path and section headers, hope they
       " won't be recognized as dictionnary name…
