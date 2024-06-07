@@ -5,28 +5,6 @@
 
 This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has not been explicitly set, say by a modeline `:help modeline`).
 
-# CHANGES
-
-Version `2.0` introduces breaking changes.
-Please adapt your configuration accordingly:
-
-- Substitute the prefix `g:guesslang_` by `g:detectspelllang_`,
-- Substitute the autocommand event label `GuessLangUpdate` by `DetectSpellLangUpdate`, and
-- Substitute, say
-
-    ```vim
-      let g:guesslang_langs = [ ... ]
-    ```
-
-    by
-
-    ```vim
-      let g:detectspelllang_langs = {}
-      let g:detectspelllang_langs.aspell = [ ... ]
-    ```
-
-    where `...` is your list of `g:guesslang_langs`.
-
 # Installation
 
 It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows.
@@ -40,7 +18,7 @@ In Microsoft Windows the path to the executable must
     let g:detectspelllang_program = 'C:\Program Files (x86)\Aspell\bin\aspell.exe'
 ```
 
-The Chocolatey package [hunspell](https://chocolatey.org/packages/hunspell.portable) automatically adds `hunspell` to the `%PATH`.
+The Scoop package [aspell](https://github.com/ScoopInstaller/Main/blob/master/bucket/aspell.json) or the Chocolatey package [hunspell](https://chocolatey.org/packages/hunspell.portable) automatically add these to the `%PATH`.
 
 # Set-up
 
@@ -115,9 +93,6 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
         \}
     \ }
     ```
-
-    Note that on Windows the most recent official aspell binaries are from
-    2002 and do not support all above file type options, for example, for 'tex'.
 
 - The value of `g:detectspelllang_threshold` defines the percentage of spelling mistakes among all words below which a spellcheck-language is recognized as correct.
     For example, with the default
