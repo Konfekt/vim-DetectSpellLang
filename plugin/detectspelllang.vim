@@ -22,24 +22,16 @@ if !executable(g:detectspelllang_program)
   finish
 endif
 
-let g:detectspelllang_aspell = (g:detectspelllang_program =~? '\<aspell\>') 
-
 if !exists('g:detectspelllang_langs')
-  " if tolower(matchstr(v:lang, '^\a\a')) is# 'en'
-  "   echoerr 'DetectSpellLang: Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '!'
-  "   finish
-  " endif
-
   " echomsg 'DetectSpellLang: Guessing second tongue other than English installed...'
   let g:detectspelllang_langs = {}
-  if g:detectspelllang_program == 'aspell'
+  if g:detectspelllang_program ==? 'aspell'
     let aspell_dicts = systemlist("aspell dicts")
     let aspell_dicts = uniq(map(aspell_dicts, {key, val -> substitute(val, '-[^\n]*', '', '')}))
     let g:detectspelllang_langs = { "aspell": aspell_dicts }
     unlet aspell_dicts
-  elseif g:detectspelllang_program == 'hunspell'
-    " TODO What's LC_ALL=C on Win32 ?
-    let output = system((has('unix') ? "LC_ALL=C " : "")  .. "hunspell -D")
+  elseif g:detectspelllang_program ==? 'hunspell'
+    let output = system((has('win32') && &shell =~? '\<cmd\>' ? "set LANG=en && " : "LC_ALL=C ")  . "hunspell -D")
     let output = substitute(
           \ output,
           \ '.*AVAILABLE DICTIONARIES[^\n]*\n\(.*\)[^\n]*\(LOADED DICTIONARIES.*\|$\)',
@@ -50,23 +42,11 @@ if !exists('g:detectspelllang_langs')
     unlet output hunspell_dicts
   endif
 
-  " let v_lang = matchstr(v:lang, '^\a\a_\a\a')
-  " if executable('sed')
-  "     let s:hunspell_dicts_cmd = 'hunspell -D 2>&1 | sed "1,/AVAILABLE DICTIONARIES/d"'
-  " else
-  "     " Not able to filter out the search path and section headers, hope they
-  "     " won't be recognized as dictionnary name ...
-  "     let s:hunspell_dicts_cmd = 'hunspell -D'
-  " endif
-  " let dicts = systemlist(
-  "         \ g:detectspelllang_aspell ?
-  "         \ 'aspell dicts' :
-  "         \ s:hunspell_dicts_cmd)
-  " let s:langs = filter(dicts, 'v:val =~# "en$" || v:val =~# "' . v_lang . '$"')
-  " let g:detectspelllang_langs[g:detectspelllang_program] = s:langs
-  " unlet s:langs
   if len(g:detectspelllang_langs[g:detectspelllang_program]) < 2
-    echoerr 'DetectSpellLang: Could not autodetect more than one language for '..g:detectspelllang_program..'. Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '!'
+    echoerr
+          \ 'DetectSpellLang: Could not autodetect more than one language for ' .g:detectspelllang_program .'. ' .
+          \ 'Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '! ' .
+          \ tolower(matchstr(v:lang, '^\a\a')) =~? '^en' ? '' : 'Ensure '.v:lang.' dictionary is installed!'
     finish
   endif
 endif

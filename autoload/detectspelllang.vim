@@ -36,7 +36,7 @@ function! detectspelllang#detectspelllang() abort
     " The language with the least misspelled words is the spell language.
     for guess in langs
       silent let mist = len(split(system(
-            \ g:detectspelllang_aspell ?
+            \ g:detectspelllang_program ==? 'aspell' ?
             \ 'aspell --lang=' . guess . ' ' . join(opts) . ' list' :
             \ 'hunspell -d ' . guess . ' ' . join(opts) . ' -l -' ,
             \ lines)))
