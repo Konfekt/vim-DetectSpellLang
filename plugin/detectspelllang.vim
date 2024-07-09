@@ -46,7 +46,8 @@ if !exists('g:detectspelllang_langs')
     echoerr
           \ 'DetectSpellLang: Could not autodetect more than one language for ' .g:detectspelllang_program .'. ' .
           \ 'Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '! ' .
-          \ tolower(matchstr(v:lang, '^\a\a')) =~? '^en' ? '' : 'Ensure '.v:lang.' dictionary is installed!'
+          \ tolower(matchstr(v:lang, '^\a\a')) =~? '^en' ? '' : 'Check if '.v:lang.' dictionary is installed;'
+          \ 'use '..(g:detectspelllang_program ==? 'aspell' ? 'aspell dicts' : 'hunspell -D')..' to list available dictionaries!'
     finish
   endif
 endif
