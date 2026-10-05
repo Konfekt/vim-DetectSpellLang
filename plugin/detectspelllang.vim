@@ -142,6 +142,15 @@ augroup DetectSpellLang
           \   call s:detectAndArm() |
           \ endif
   endif
+  " covers &l:spell being turned on indirectly, e.g. by an ftplugin, when
+  " the filetype is assigned after the buffer was already displayed (a
+  " dynamic content-based filetype detector is a common source of this);
+  " OptionSet spell does not reliably fire in that case because Vim does
+  " not nest autocommands triggered by other, non-'++nested' autocommands
+  autocmd FileType *
+        \ if exists('b:detectspelllang_modelines_read') && !exists('b:detectspelllang_explicit') && &l:spell |
+        \   call s:detectAndArm() |
+        \ endif
   autocmd BufWinEnter *
         \ let b:detectspelllang_modelines_read = 1 |
         \ if &l:spell && !exists('b:detectspelllang_explicit') |
