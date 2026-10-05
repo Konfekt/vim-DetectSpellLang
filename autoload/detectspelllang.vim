@@ -1,16 +1,22 @@
 function! detectspelllang#detectspelllang() abort
+  let checker = g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' : 'hunspell'
+  let langs = get(g:detectspelllang_langs, checker, [])
+  if empty(langs)
+    return ''
+  endif
+
   " take lines around middle
-  let end = line('$')
-  let middle = (1 + end)/2
-  let number_of_lines = min([g:detectspelllang_lines, end])/2
-  let lines = getline( middle - number_of_lines, middle + number_of_lines )
+  let last = line('$')
+  let middle = (1 + last)/2
+  let number_of_lines = min([g:detectspelllang_lines, last])/2
+  let lines = getline(middle - number_of_lines, middle + number_of_lines)
 
   let opts = []
-  if exists('g:detectspelllang_ftoptions.' . g:detectspelllang_program)
-    let ftoptions = g:detectspelllang_ftoptions[g:detectspelllang_program]
+  if exists('g:detectspelllang_ftoptions.' . checker)
+    let ftoptions = g:detectspelllang_ftoptions[checker]
     for filetype in keys(ftoptions)
       if &l:filetype is# filetype
-        let opts = get(ftoptions, filetype, '')
+        let opts = get(ftoptions, filetype, [])
         break
       endif
     endfor
@@ -21,38 +27,65 @@ function! detectspelllang#detectspelllang() abort
     let lines = filter(lines, 'v:val =~# "\\v(^|[[:space:]])[[:lower:][:upper:]]{2,}[[:space:]][[:lower:][:upper:]]"')
   endif
 
-  let langs = g:detectspelllang_langs[g:detectspelllang_program]
-  if empty(lines) || len(langs) < 2
-    " default to first (=system) language
-    let lang = langs[0]
-  else
-    let end = len(lines)
-    let middle = (1 + end)/2
-    let lines = lines[max([0, middle - g:detectspelllang_lines]):min([end, middle + g:detectspelllang_lines])]
+  " default to first (=system) language
+  let lang = langs[0]
+
+  if !empty(lines) && len(langs) >= 2
+    let last = len(lines)
+    let middle = (1 + last)/2
+    let lines = lines[max([0, middle - g:detectspelllang_lines]):min([last, middle + g:detectspelllang_lines])]
 
     let words = len(split(join(lines, ' ')))
 
     " For each language, get number of misspelled words according to aspell or hunspell.
     " The language with the least misspelled words is the spell language.
-    for guess in langs
-      silent let mist = len(split(system(
-            \ g:detectspelllang_program ==? 'aspell' ?
-            \ 'aspell --lang=' . guess . ' ' . join(opts) . ' list' :
-            \ 'hunspell -d ' . guess . ' ' . join(opts) . ' -l -' ,
-            \ lines)))
-      " already correct lang if less threshold many % wrong
-      if (mist * 100 / words) < g:detectspelllang_threshold
-        let lang = guess
-        break
-      elseif !exists('mistmin') || mist < mistmin
-        let mistmin = mist
-        let lang = guess
+    if words > 0
+      let lang = ''
+      let program = shellescape(g:detectspelllang_program)
+      for guess in langs
+        let output = system(
+              \ checker ==# 'aspell' ?
+              \ program . ' --lang=' . shellescape(guess) . ' ' . join(opts) . ' list' :
+              \ program . ' -d ' . shellescape(guess) . ' ' . join(opts) . ' -l -' ,
+              \ lines)
+        " a failing dictionary must not win with zero misspellings
+        if v:shell_error
+          continue
+        endif
+        let mist = len(split(output))
+        " already correct lang if less threshold many % wrong
+        if (mist * 100 / words) < g:detectspelllang_threshold
+          let lang = guess
+          break
+        elseif empty(lang) || mist < mistmin
+          let mistmin = mist
+          let lang = guess
+        endif
+      endfor
+      " all checks failed; keep the default language
+      if empty(lang)
+        let lang = langs[0]
       endif
-    endfor
+    endif
   endif
 
-  let lang_pattern = '^\a\a\(_\a\a\)\?'
-  let lang = tolower(matchstr(lang, lang_pattern))
-  return lang
+  return tolower(matchstr(lang, '^\a\a\(_\a\a\)\?'))
 endfunction
 
+" Detect the spell language and assign it to &l:spelllang, guarding the
+" OptionSet autocmd against the plugin's own assignment.
+function! detectspelllang#apply() abort
+  let new = detectspelllang#detectspelllang()
+  if empty(new)
+    return
+  endif
+  let b:detectspelllang_old = &l:spelllang
+  let b:detectspelllang_new = new
+  let b:detectspelllang_lock = 1
+  try
+    silent let &l:spelllang = new
+  finally
+    unlet b:detectspelllang_lock
+  endtry
+  silent doautocmd <nomodeline> User DetectSpellLangUpdate
+endfunction

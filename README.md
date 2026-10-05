@@ -46,10 +46,10 @@ You can override this automatic detection by adding to you `vimrc` say
 
 The language is detected, depending on whether `aspell` respectively `hunspell`
 is used, among those listed in `g:detectspelllang_langs.aspell` respectively
-`g:detectspelllang_langs.hunspell`. It is *empty* by default and has to be
-set by the user to a list of languages included in that of the output of the
-command `aspell dicts` respectively `hunspell -D`**!**
-For example,
+`g:detectspelllang_langs.hunspell`. By default these lists are autodetected
+from the output of the commands `aspell dicts` respectively `hunspell -D`,
+and the languages of the current locale as well as English are tried first.
+To override the autodetection, set the lists yourself, for example,
 
 ```vim
     let g:detectspelllang_langs = {

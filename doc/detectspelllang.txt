@@ -48,20 +48,23 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 
 - The language is detected, depending on whether aspell respectively hunspell
   is used, among those listed in g:detectspelllang_langs.aspell respectively
-  g:detectspelllang_langs.hunspell. It is *empty* by default and has to be
-  set by the user to a list of languages included in that of the output of the
-  command aspell dicts respectively hunspell -D!
-
+  g:detectspelllang_langs.hunspell. By default these lists are autodetected
+  from the output of the commands aspell dicts respectively hunspell -D and
+  the languages of the current locale as well as English are tried first.
+  To override the autodetection, set the lists yourself, for example
 >
   let g:detectspelllang_langs = {}
   let g:detectspelllang_langs.aspell = [ 'en_US', 'de_DE', 'es', 'it' ]
 <
-  respectively, in case you use unspell,
+  respectively, in case you use hunspell,
 >
   let g:detectspelllang_langs.hunspell = [ 'en_US', 'de_DE', 'es_ES', 'it_IT' ]
 <
+  The executable is autodetected (aspell is preferred); to override it, set
+  g:detectspelllang_program to 'aspell' or 'hunspell' (or its full path).
+
 - The value of 'g:detectspelllang_lines' defines how many lines are tested for
-  spelling mistakes by hunspell to derive the suitable spellcheck-language.
+  spelling mistakes by aspell or hunspell to derive the suitable spellcheck-language.
   By default
 >
   let g:detectspelllang_lines = 1000

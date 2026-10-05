@@ -22,32 +22,44 @@ if !executable(g:detectspelllang_program)
   finish
 endif
 
+" the kind of spell checker, whatever path g:detectspelllang_program holds
+let s:checker = g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' :
+      \         g:detectspelllang_program =~? '\<hunspell\>' ? 'hunspell' : ''
+
 if !exists('g:detectspelllang_langs')
-  " echomsg 'DetectSpellLang: Guessing second tongue other than English installed...'
   let g:detectspelllang_langs = {}
-  if g:detectspelllang_program ==? 'aspell'
-    let aspell_dicts = systemlist("aspell dicts")
-    let aspell_dicts = uniq(map(aspell_dicts, {key, val -> substitute(val, '-[^\n]*', '', '')}))
-    let g:detectspelllang_langs = { "aspell": aspell_dicts }
-    unlet aspell_dicts
-  elseif g:detectspelllang_program ==? 'hunspell'
-    let output = system((has('win32') && &shell =~? '\<cmd\>' ? "set LANG=en && " : "LC_ALL=C ")  . "hunspell -D")
-    let output = substitute(
-          \ output,
-          \ '.*AVAILABLE DICTIONARIES[^\n]*\n\(.*\)[^\n]*\(LOADED DICTIONARIES.*\|$\)',
-          \ '\1',
-          \ '')
-    let hunspell_dicts = map(split(output), {key, val -> substitute(val, ".*\/", "", "")})
-    let g:detectspelllang_langs = { "hunspell": hunspell_dicts }
-    unlet output hunspell_dicts
+  if s:checker ==# 'aspell'
+    let dicts = systemlist(shellescape(g:detectspelllang_program) . ' dicts')
+    let dicts = uniq(map(dicts, {key, val -> substitute(val, '-[^\n]*', '', '')}))
+  elseif s:checker ==# 'hunspell'
+    " hunspell -D lists the dictionaries on stderr
+    let output = system((has('win32') && &shell =~? '\<cmd\>' ? "set LANG=en && " : "LC_ALL=C ") . shellescape(g:detectspelllang_program) . " -D 2>&1")
+    " keep only the dictionary paths and reduce them to the dictionary names
+    let dicts = uniq(sort(map(
+          \ filter(split(output, '\n'), {key, val -> val =~# '^\%([A-Za-z]:[\\/]\|/\)'}),
+          \ {key, val -> substitute(val, '^.*[\\/]\|\.\%(aff\|dic\)$', '', 'g')})))
+    unlet output
+  else
+    let dicts = []
   endif
 
-  if len(g:detectspelllang_langs[g:detectspelllang_program]) < 2
-    echoerr
-          \ 'DetectSpellLang: Could not autodetect more than one language for ' .g:detectspelllang_program .'. ' .
-          \ 'Please list at least two different languages in g:detectspelllang_langs.' . g:detectspelllang_program . '! ' .
-          \ tolower(matchstr(v:lang, '^\a\a')) =~? '^en' ? '' : 'Check if '.v:lang.' dictionary is installed;'
-          \ 'use '..(g:detectspelllang_program ==? 'aspell' ? 'aspell dicts' : 'hunspell -D')..' to list available dictionaries!'
+  " try the system language and English first: likelier and faster matches
+  let system_lang = tolower(matchstr(v:lang, '^\a\a'))
+  let g:detectspelllang_langs[s:checker] =
+        \ filter(copy(dicts), 'v:val =~# "^" . system_lang') +
+        \ filter(copy(dicts), 'v:val !~# "^" . system_lang && v:val =~# "^en"') +
+        \ filter(dicts,       'v:val !~# "^" . system_lang && v:val !~# "^en"')
+  unlet system_lang dicts
+
+  if len(g:detectspelllang_langs[s:checker]) < 2
+    let s:errmsg =
+          \ 'DetectSpellLang: Could not autodetect more than one language for ' . g:detectspelllang_program . '. ' .
+          \ 'Please list at least two different languages in g:detectspelllang_langs.' . s:checker . '! '
+    if tolower(matchstr(v:lang, '^\a\a')) !~? '^en'
+      let s:errmsg .= 'Check if the ' . v:lang . ' dictionary is installed; '
+    endif
+    let s:errmsg .= 'Use ' . (s:checker ==# 'aspell' ? 'aspell dicts' : 'hunspell -D') . ' to list available dictionaries!'
+    echoerr s:errmsg
     finish
   endif
 endif
@@ -94,26 +106,23 @@ endfunction
 augroup DetectSpellLang
   autocmd!
   if exists('##OptionSet')
+    " b:detectspelllang_lock is set while the plugin itself assigns &l:spelllang
     autocmd OptionSet spelllang
-          \ let b:detectspelllang_explicit = 1 |
-          \ let b:detectspelllang_new = v:option_new |
-          \ let b:detectspelllang_old = v:option_old |
-          \ silent doautocmd <nomodeline> User DetectSpellLangUpdate
+          \ if !exists('b:detectspelllang_lock') |
+          \   let b:detectspelllang_explicit = 1 |
+          \   let b:detectspelllang_new = v:option_new |
+          \   let b:detectspelllang_old = v:option_old |
+          \   silent doautocmd <nomodeline> User DetectSpellLangUpdate |
+          \ endif
     autocmd OptionSet spell
           \ if exists('b:detectspelllang_modelines_read') && !exists('b:detectspelllang_explicit') && v:option_new |
-          \   let b:detectspelllang_new = detectspelllang#detectspelllang() |
-          \   let b:detectspelllang_old = &l:spelllang |
-          \   silent let &l:spelllang    = b:detectspelllang_new |
-          \   silent doautocmd <nomodeline> User DetectSpellLangUpdate |
+          \   call detectspelllang#apply() |
           \ endif
   endif
   autocmd BufWinEnter *
         \ let b:detectspelllang_modelines_read = 1 |
         \ if &l:spell && !exists('b:detectspelllang_explicit') |
-        \   let b:detectspelllang_new = detectspelllang#detectspelllang() |
-        \   let b:detectspelllang_old = &l:spelllang |
-        \   silent let &l:spelllang    = b:detectspelllang_new |
-        \   silent doautocmd <nomodeline> User DetectSpellLangUpdate |
+        \   call detectspelllang#apply() |
         \ endif |
         \ call s:augroupUpdateLang()
 augroup end
