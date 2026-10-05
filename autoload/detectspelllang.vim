@@ -1,8 +1,19 @@
+" remembers, per checker, the language last successfully detected this
+" session, so that it is tried first for the next buffer
+let s:lastlang = {}
+
 function! detectspelllang#detectspelllang() abort
   let checker = g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' : 'hunspell'
   let langs = get(g:detectspelllang_langs, checker, [])
   if empty(langs)
     return ''
+  endif
+
+  " try the language last detected this session first: it is both the
+  " likeliest match and avoids spawning a process for less likely ones
+  let cached = get(s:lastlang, checker, '')
+  if !empty(cached) && index(langs, cached) >= 0
+    let langs = [cached] + filter(copy(langs), 'v:val !=# cached')
   endif
 
   " take lines around middle
@@ -65,6 +76,8 @@ function! detectspelllang#detectspelllang() abort
       " all checks failed; keep the default language
       if empty(lang)
         let lang = langs[0]
+      else
+        let s:lastlang[checker] = lang
       endif
     endif
   endif
