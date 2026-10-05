@@ -91,16 +91,33 @@ if !exists('g:detectspelllang_ftoptions.hunspell')
     \}
 endif
 
+" number of words above which a buffer's sample is considered large enough
+" that scheduling another detection attempt is not worth its cost
+let s:min_words_for_sample = 10
+
 function! s:augroupUpdateLang()
   augroup DetectSpellLangUpdateLang
-    autocmd!
+    " clear only this buffer's autocmds: a bare 'autocmd!' would also wipe
+    " the pending retry hook of every other armed buffer
+    autocmd! * <buffer>
     autocmd CursorHold,CursorHoldI,BufWrite <buffer>
           \   if    (&l:spell && !exists('b:detectspelllang_explicit'))
-          \      && (b:changedtick >= 80  && wordcount().words >= 10) |
-          \     exe 'silent doautocmd <nomodeline> DetectSpellLang BufWinEnter' |
-          \     exe 'autocmd! DetectSpellLangUpdateLang CursorHold,CursorHoldI,BufWrite <buffer>' |
+          \      && (b:changedtick >= 80  && wordcount().words >= s:min_words_for_sample) |
+          \     call detectspelllang#apply() |
+          \     exe 'autocmd! DetectSpellLangUpdateLang * <buffer>' |
           \   endif
   augroup END
+endfunction
+
+" detect the language, then arm a one-shot retry for when the buffer did not
+" yet hold enough text for a reliable sample, or disarm a stale one
+function! s:detectAndArm() abort
+  call detectspelllang#apply()
+  if wordcount().words < s:min_words_for_sample
+    call s:augroupUpdateLang()
+  elseif exists('#DetectSpellLangUpdateLang')
+    autocmd! DetectSpellLangUpdateLang * <buffer>
+  endif
 endfunction
 
 augroup DetectSpellLang
@@ -116,15 +133,14 @@ augroup DetectSpellLang
           \ endif
     autocmd OptionSet spell
           \ if exists('b:detectspelllang_modelines_read') && !exists('b:detectspelllang_explicit') && v:option_new |
-          \   call detectspelllang#apply() |
+          \   call s:detectAndArm() |
           \ endif
   endif
   autocmd BufWinEnter *
         \ let b:detectspelllang_modelines_read = 1 |
         \ if &l:spell && !exists('b:detectspelllang_explicit') |
-        \   call detectspelllang#apply() |
-        \ endif |
-        \ call s:augroupUpdateLang()
+        \   call s:detectAndArm() |
+        \ endif
 augroup end
 if argc() > 1
   silent doautocmd DetectSpellLang BufWinEnter
