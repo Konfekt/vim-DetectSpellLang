@@ -102,7 +102,7 @@ function! s:augroupUpdateLang()
     autocmd! * <buffer>
     autocmd CursorHold,CursorHoldI,BufWrite <buffer>
           \   if    (&l:spell && !exists('b:detectspelllang_explicit'))
-          \      && (b:changedtick >= 80  && wordcount().words >= s:min_words_for_sample) |
+          \      && (wordcount().words >= s:min_words_for_sample) |
           \     call detectspelllang#apply() |
           \     exe 'autocmd! DetectSpellLangUpdateLang * <buffer>' |
           \   endif
