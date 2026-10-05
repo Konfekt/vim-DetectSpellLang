@@ -100,7 +100,13 @@ function! s:augroupUpdateLang()
     " clear only this buffer's autocmds: a bare 'autocmd!' would also wipe
     " the pending retry hook of every other armed buffer
     autocmd! * <buffer>
-    autocmd CursorHold,CursorHoldI,BufWrite <buffer>
+    " TextChanged/TextChangedI fire as soon as an edit (e.g. a paste)
+    " settles, so they usually catch it well before CursorHold(I) would
+    " (which waits out 'updatetime' of inactivity); TextChanged is
+    " documented to not trigger while there is pending typeahead, so
+    " CursorHold(I) is kept as a guaranteed fallback, and BufWrite as a
+    " fallback for non-interactive edits
+    autocmd TextChanged,TextChangedI,CursorHold,CursorHoldI,BufWrite <buffer>
           \   if    (&l:spell && !exists('b:detectspelllang_explicit'))
           \      && (wordcount().words >= s:min_words_for_sample) |
           \     call detectspelllang#apply() |
