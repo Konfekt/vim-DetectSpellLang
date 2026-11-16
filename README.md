@@ -60,6 +60,7 @@ To override the autodetection, set the lists yourself, for example,
 ```
 
 Please pay attention, as `hunspell` does, to the upper case of the suffix of the language code.
+The detected dictionary sets `&spelllang` to its language code of two or three letters and its two-letter region, if any; for example, `en_GB-ize` gives `en_gb`, `ast_ES` gives `ast_es` and `sr_Latn_RS` gives `sr`.
 
 # Configuration
 

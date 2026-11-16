@@ -136,9 +136,10 @@ endfunction
 augroup DetectSpellLang
   autocmd!
   if exists('##OptionSet')
-    " b:detectspelllang_lock is set while the plugin itself assigns &l:spelllang
+    " b:detectspelllang_lock is set while the plugin itself assigns
+    " &l:spelllang; :setglobal does not choose the language of this buffer
     autocmd OptionSet spelllang
-          \ if !exists('b:detectspelllang_lock') |
+          \ if !exists('b:detectspelllang_lock') && get(v:, 'option_command', '') !=# 'setglobal' |
           \   let b:detectspelllang_explicit = 1 |
           \   let b:detectspelllang_new = v:option_new |
           \   let b:detectspelllang_old = v:option_old |
