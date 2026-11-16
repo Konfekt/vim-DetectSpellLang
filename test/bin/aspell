@@ -1,0 +1,6 @@
+#!/bin/sh
+# Stand-in for aspell that answers like its Windows build, with CRLF line ends.
+case "$*" in
+  *dicts*) printf 'de_DE\r\nde_DE-neu\r\nen\r\nen_US\r\nen_US-variant_0\r\n' ;;
+  *) cat >/dev/null ;; # list: report no misspelled words
+esac

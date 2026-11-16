@@ -1,0 +1,6 @@
+#!/bin/sh
+# Stand-in for hunspell that answers like its Windows build, with CRLF line ends.
+case "$*" in
+  *-D*) printf 'SEARCH PATH:\r\n.:/usr/share/hunspell\r\nAVAILABLE DICTIONARIES (path is not mandatory for -d option):\r\n/usr/share/hunspell/de_DE\r\n/usr/share/hunspell/en_US\r\nLOADED DICTIONARY:\r\n/usr/share/hunspell/en_US.aff\r\n/usr/share/hunspell/en_US.dic\r\n' >&2 ;;
+  *) cat >/dev/null ;; # -l: report no misspelled words
+esac
