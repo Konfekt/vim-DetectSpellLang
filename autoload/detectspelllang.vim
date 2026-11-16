@@ -74,7 +74,15 @@ function! detectspelllang#detectspelllang() abort
     endif
   endif
 
-  return tolower(matchstr(lang, '^\a\a\(_\a\a\)\?'))
+  return s:spelllang(lang)
+endfunction
+
+" The 'spelllang' value for a dictionary name: the two- or three-letter
+" language code and a two-letter region, if any, so en_US-ize -> en_us,
+" de_DE_frami -> de_de, ast_ES -> ast_es and sr_Latn_RS -> sr.
+function! s:spelllang(dict) abort
+  let lang = matchstr(a:dict, '\v^\a{2,3}%(\A|$)@=%(_\a{2}%(\A|$)@=)?')
+  return tolower(empty(lang) ? matchstr(a:dict, '^\a\a') : lang)
 endfunction
 
 " Detect the spell language and assign it to &l:spelllang, guarding the

@@ -45,6 +45,24 @@ else
       call assert_equal(s:checker ==# 'aspell' ? ['en', 'en_US', 'de_DE'] : ['en_US', 'de_DE'],
             \ g:detectspelllang_langs[s:checker])
     endfunction
+
+    " the stand-ins report no misspellings, so the first language wins
+    function! Test_spelllang_from_dictionary_name() abort
+      let saved = g:detectspelllang_langs[s:checker]
+      enew!
+      call setline(1, 'The quick brown fox jumps over the lazy dog.')
+      try
+        for [dict, expected] in [['en_US', 'en_us'], ['en_GB-ize', 'en_gb'],
+              \ ['de_DE_frami', 'de_de'], ['ast_ES', 'ast_es'], ['sr_Latn_RS', 'sr'],
+              \ ['nds', 'nds'], ['english', 'en']]
+          let g:detectspelllang_langs[s:checker] = [dict, 'fr_FR']
+          call assert_equal(expected, detectspelllang#detectspelllang(), dict)
+        endfor
+      finally
+        let g:detectspelllang_langs[s:checker] = saved
+        enew!
+      endtry
+    endfunction
   endif
 endif
 

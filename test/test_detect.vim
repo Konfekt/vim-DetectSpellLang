@@ -75,6 +75,17 @@ function! Test_filetype_options_are_passed() abort
   call assert_match('^de', &l:spelllang)
 endfunction
 
+" only a buffer-local spelllang is an explicit choice for the buffer
+function! Test_setglobal_spelllang_is_not_explicit() abort
+  call s:edit('global.txt', s:german)
+  call assert_false(exists('b:detectspelllang_explicit'), 'before')
+  setglobal spelllang=fr
+  call assert_false(exists('b:detectspelllang_explicit'), 'setglobal')
+  setlocal spelllang=fr
+  call assert_true(exists('b:detectspelllang_explicit'), 'setlocal')
+  setglobal spelllang&
+endfunction
+
 function! s:run() abort
   set spell
   call RunTests('test_detect.vim')

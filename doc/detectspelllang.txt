@@ -63,6 +63,10 @@ to ~/.vim/ftplugin/text.vim (respectively markdown.vim and mail.vim).
 >
   let g:detectspelllang_langs.hunspell = [ 'en_US', 'de_DE', 'es_ES', 'it_IT' ]
 <
+  The detected dictionary sets 'spelllang' to its language code of two or
+  three letters and its two-letter region, if any; for example, en_GB-ize
+  gives en_gb, ast_ES gives ast_es and sr_Latn_RS gives sr.
+
                                                 *g:detectspelllang_program*
   The executable is autodetected (aspell is preferred); to override it, set
   g:detectspelllang_program to 'aspell' or 'hunspell' (or its full path).
