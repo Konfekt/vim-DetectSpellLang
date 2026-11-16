@@ -5,7 +5,7 @@
 set -u
 cd "$(dirname "$0")/.." || exit 1
 [ $# -gt 0 ] || set -- vim nvim
-LC_ALL=C LANG=C LANGUAGE= DSL_TEST_LOG=$(mktemp) || exit 1
+LC_ALL=C LANG=C LANGUAGE='' DSL_TEST_LOG=$(mktemp) || exit 1
 export LC_ALL LANG LANGUAGE DSL_TEST_LOG
 trap 'rm -f "$DSL_TEST_LOG"' EXIT
 status=0
