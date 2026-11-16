@@ -1,68 +1,75 @@
-if exists('g:loaded_DetectSpellLang') || &cp
+if exists('g:loaded_DetectSpellLang') || &compatible
   finish
 endif
 let g:loaded_DetectSpellLang = 1
 
-let s:keepcpo         = &cpo
-set cpo&vim
+let s:keepcpo = &cpoptions
+set cpoptions&vim
 " ------------------------------------------------------------------------------
 
-if !exists('g:detectspelllang_program')
-  if executable('aspell')
-    let g:detectspelllang_program = 'aspell'
-  elseif executable('hunspell')
-    let g:detectspelllang_program = 'hunspell'
+" Lists the dictionaries that the spell checker of kind {checker} reports, with
+" the system language and English first, as they are likelier and faster matches.
+function! s:dictionaries(checker) abort
+  let program = shellescape(g:detectspelllang_program)
+  if a:checker ==# 'aspell'
+    " strip variants such as en_GB-ize or de-neu
+    let dicts = map(split(system(program . ' dicts'), '\r\=\n'),
+          \ {key, val -> substitute(val, '-.*', '', '')})
   else
-    let g:detectspelllang_program = ''
+    " hunspell -D lists the dictionaries on stderr; keep only their paths and
+    " reduce them to the dictionary names
+    let output = system((has('win32') && &shell =~? '\<cmd\>' ? 'set LANG=en && ' : 'LC_ALL=C ') . program . ' -D 2>&1')
+    let dicts = map(
+          \ filter(split(output, '\r\=\n'), {key, val -> val =~# '^\%([A-Za-z]:[\\/]\|/\)'}),
+          \ {key, val -> substitute(val, '^.*[\\/]\|\.\%(aff\|dic\)$', '', 'g')})
   endif
-endif
+  let dicts = uniq(sort(filter(dicts, {key, val -> !empty(val)})))
 
-if !executable(g:detectspelllang_program)
-  echoerr 'DetectSpellLang: Please install aspell or hunspell!'
+  " v:lang is, for example, C or POSIX if no locale is set
+  let system_lang = tolower(matchstr(v:lang, '^\a\a\ze\%([_.@-]\|$\)'))
+  let first = empty(system_lang) ? [] : filter(copy(dicts), {key, val -> val =~# '^' . system_lang})
+  call filter(dicts, {key, val -> index(first, val) < 0})
+  return first + filter(copy(dicts), {key, val -> val =~# '^en'}) + filter(dicts, {key, val -> val !~# '^en'})
+endfunction
+
+" Sets up g:detectspelllang_program and g:detectspelllang_langs, unless set
+" by the user, and returns an error message if that fails.
+function! s:setup() abort
+  if !exists('g:detectspelllang_program')
+    let g:detectspelllang_program =
+          \ executable('aspell')   ? 'aspell'   :
+          \ executable('hunspell') ? 'hunspell' : ''
+  endif
+  if !executable(g:detectspelllang_program)
+    return 'DetectSpellLang: Please install aspell or hunspell!'
+  endif
+
+  if exists('g:detectspelllang_langs')
+    return ''
+  endif
+  let checker = detectspelllang#checker()
+  let g:detectspelllang_langs = {checker : s:dictionaries(checker)}
+  if len(g:detectspelllang_langs[checker]) >= 2
+    return ''
+  endif
+
+  let msg =
+        \ 'DetectSpellLang: Could not autodetect more than one language for ' . g:detectspelllang_program . '. ' .
+        \ 'Please list at least two different languages in g:detectspelllang_langs.' . checker . '! '
+  if v:lang !~? '^en'
+    let msg .= 'Check if the ' . v:lang . ' dictionary is installed; '
+  endif
+  return msg . 'Use ' . (checker ==# 'aspell' ? 'aspell dicts' : 'hunspell -D') . ' to list available dictionaries!'
+endfunction
+
+let s:errmsg = s:setup()
+if !empty(s:errmsg)
+  let &cpoptions = s:keepcpo
+  unlet s:keepcpo
+  echoerr s:errmsg
   finish
 endif
-
-" the kind of spell checker, whatever path g:detectspelllang_program holds
-let s:checker = g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' :
-      \         g:detectspelllang_program =~? '\<hunspell\>' ? 'hunspell' : ''
-
-if !exists('g:detectspelllang_langs')
-  let g:detectspelllang_langs = {}
-  if s:checker ==# 'aspell'
-    let dicts = systemlist(shellescape(g:detectspelllang_program) . ' dicts')
-    let dicts = uniq(map(dicts, {key, val -> substitute(val, '-[^\n]*', '', '')}))
-  elseif s:checker ==# 'hunspell'
-    " hunspell -D lists the dictionaries on stderr
-    let output = system((has('win32') && &shell =~? '\<cmd\>' ? "set LANG=en && " : "LC_ALL=C ") . shellescape(g:detectspelllang_program) . " -D 2>&1")
-    " keep only the dictionary paths and reduce them to the dictionary names
-    let dicts = uniq(sort(map(
-          \ filter(split(output, '\n'), {key, val -> val =~# '^\%([A-Za-z]:[\\/]\|/\)'}),
-          \ {key, val -> substitute(val, '^.*[\\/]\|\.\%(aff\|dic\)$', '', 'g')})))
-    unlet output
-  else
-    let dicts = []
-  endif
-
-  " try the system language and English first: likelier and faster matches
-  let system_lang = tolower(matchstr(v:lang, '^\a\a'))
-  let g:detectspelllang_langs[s:checker] =
-        \ filter(copy(dicts), 'v:val =~# "^" . system_lang') +
-        \ filter(copy(dicts), 'v:val !~# "^" . system_lang && v:val =~# "^en"') +
-        \ filter(dicts,       'v:val !~# "^" . system_lang && v:val !~# "^en"')
-  unlet system_lang dicts
-
-  if len(g:detectspelllang_langs[s:checker]) < 2
-    let s:errmsg =
-          \ 'DetectSpellLang: Could not autodetect more than one language for ' . g:detectspelllang_program . '. ' .
-          \ 'Please list at least two different languages in g:detectspelllang_langs.' . s:checker . '! '
-    if tolower(matchstr(v:lang, '^\a\a')) !~? '^en'
-      let s:errmsg .= 'Check if the ' . v:lang . ' dictionary is installed; '
-    endif
-    let s:errmsg .= 'Use ' . (s:checker ==# 'aspell' ? 'aspell dicts' : 'hunspell -D') . ' to list available dictionaries!'
-    echoerr s:errmsg
-    finish
-  endif
-endif
+unlet s:errmsg
 
 if !exists('g:detectspelllang_lines')     | let g:detectspelllang_lines = 1000   | endif
 if !exists('g:detectspelllang_threshold') | let g:detectspelllang_threshold = 20 | endif
@@ -162,5 +169,5 @@ if argc() > 1
 endif
 
 " ------------------------------------------------------------------------------
-let &cpo= s:keepcpo
+let &cpoptions = s:keepcpo
 unlet s:keepcpo

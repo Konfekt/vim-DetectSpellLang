@@ -2,8 +2,13 @@
 " session, so that it is tried first for the next buffer
 let s:lastlang = {}
 
+" the kind of spell checker, whatever path g:detectspelllang_program holds
+function! detectspelllang#checker() abort
+  return g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' : 'hunspell'
+endfunction
+
 function! detectspelllang#detectspelllang() abort
-  let checker = g:detectspelllang_program =~? '\<aspell\>' ? 'aspell' : 'hunspell'
+  let checker = detectspelllang#checker()
   let langs = get(g:detectspelllang_langs, checker, [])
   if empty(langs)
     return ''
@@ -22,16 +27,7 @@ function! detectspelllang#detectspelllang() abort
   let number_of_lines = min([g:detectspelllang_lines, last])/2
   let lines = getline(middle - number_of_lines, middle + number_of_lines)
 
-  let opts = []
-  if exists('g:detectspelllang_ftoptions.' . checker)
-    let ftoptions = g:detectspelllang_ftoptions[checker]
-    for filetype in keys(ftoptions)
-      if &l:filetype is# filetype
-        let opts = get(ftoptions, filetype, [])
-        break
-      endif
-    endfor
-  endif
+  let opts = get(get(g:detectspelllang_ftoptions, checker, {}), &l:filetype, [])
 
   " filter out whatever appears not to be prose
   if empty(opts)
@@ -42,10 +38,6 @@ function! detectspelllang#detectspelllang() abort
   let lang = langs[0]
 
   if !empty(lines) && len(langs) >= 2
-    let last = len(lines)
-    let middle = (1 + last)/2
-    let lines = lines[max([0, middle - g:detectspelllang_lines]):min([last, middle + g:detectspelllang_lines])]
-
     let words = len(split(join(lines, ' ')))
 
     " For each language, get number of misspelled words according to aspell or hunspell.

@@ -4,10 +4,11 @@
 # Introduction
 
 This Vim plug-in autodetects the tongue (= `&spelllang`) of the text in a buffer (if it is spell checked, that is, `&spell` is set, and `&spelllang` has not been explicitly set, say by a modeline `:help modeline`).
+If the buffer holds too little text for a reliable guess, say fewer than ten words, then the language is detected again as soon as it holds enough.
 
 # Installation
 
-It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows.
+It uses either the spell checker `aspell` or `hunspell` (which are installed in many Linux distributions, in Mac OS, and [both](http://aspell.net/man-html/WIN32-Notes.html) [available](https://chocolatey.org/packages/hunspell.portable) for Microsoft Windows).
 
 In Microsoft Windows the path to the executable must
 
@@ -18,7 +19,7 @@ In Microsoft Windows the path to the executable must
     let g:detectspelllang_program = 'C:\Program Files (x86)\Aspell\bin\aspell.exe'
 ```
 
-The Scoop package [aspell](https://github.com/ScoopInstaller/Main/blob/master/bucket/aspell.json) or the Chocolatey package [hunspell](https://chocolatey.org/packages/hunspell.portable) automatically add these to the `%PATH`.
+The Scoop package [aspell](https://github.com/ScoopInstaller/Main/blob/master/bucket/aspell.json) or the Chocolatey package [hunspell](https://chocolatey.org/packages/hunspell.portable) automatically add these to the `%PATH%`.
 
 # Set-up
 
@@ -38,7 +39,7 @@ or the line
 to `text.vim`, `markdown.vim` and `mail.vim` in `~/.vim/ftplugin` (on Microsoft Windows, in `%USERPROFILE%\vimfiles\ftplugin`).
 
 The executable of the spell checker is automatically detected and preference given to `aspell`.
-You can override this automatic detection by adding to you `vimrc` say
+You can override this automatic detection by adding to your `vimrc`, say,
 
 ```vim
     let g:detectspelllang_program = 'hunspell'
@@ -101,7 +102,7 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
     let g:detectspelllang_threshold = 20
     ```
 
-    and g:detectspelllang_langs = [ 'en_US', 'de_DE' ], if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
+    and `g:detectspelllang_langs.aspell = [ 'en_US', 'de_DE' ]`, if less than 20% of all words in the buffer are spelling mistakes for `'en_US'`, then `'DetectSpellLang'` does not verify if the percentage of spelling mistakes for `'de_DE'` is below that for `'en_US'`.
 
 - The autocommand event
 
@@ -112,6 +113,15 @@ Please pay attention, as `hunspell` does, to the upper case of the suffix of the
     provides by the buffer-local variables `b:detectspelllang_old` and `b:detectspelllang_new` the previous and current value of `&l:spelllang`, the spell-check language.
     This way, a user command, for example for adding and removing abbreviations specific to a language, can hook in.
 
+# Tests
+
+The headless tests in `test/` run in Vim and Neovim, against `aspell` and `hunspell` (if installed, with English and German dictionaries) and against stand-ins for both:
+
+```sh
+test/run.sh            # vim and nvim
+test/run.sh nvim       # only nvim
+```
+
 # Credits
 
-This plug-in fleshes out a [gist](https://gist.github.com/arenevier/1142114) by Arno Renevier that, later on, in May 2019, turns out to be part of a plug-in [GuessLang.vim](https://github.com/arenevier/vimguesslang/blob/master/GuessLang.vim) from 2011 by the same author.
+This plug-in fleshes out a [gist](https://gist.github.com/arenevier/1142114) by Arno Renevier that turns out to be part of his plug-in [GuessLang.vim](https://github.com/arenevier/vimguesslang/blob/master/GuessLang.vim).
